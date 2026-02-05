@@ -1,29 +1,16 @@
-/**
- * Task Edit Page
- *
- * Features:
- * - Fetches existing task data
- * - Reuses TaskForm in edit mode
- * - Protected route
- * - Consistent header with dashboard
- */
-
-import { redirect, notFound } from 'next/navigation';
-import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 import * as jose from 'jose';
-import { auth } from '@/lib/auth';
 import { TaskForm } from '@/components/TaskForm';
 import { Task } from '@/types/task';
 import Link from 'next/link';
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID || 'default-user';
+const DEFAULT_USER_EMAIL = process.env.DEFAULT_USER_EMAIL || 'user@taskflow.app';
+const DEFAULT_USER_NAME = process.env.DEFAULT_USER_NAME || 'User';
 
-/**
- * Create a JWT token for backend authentication.
- */
 async function createToken(userId: string, email?: string): Promise<string> {
   const secret = new TextEncoder().encode(process.env.BETTER_AUTH_SECRET || '');
 
@@ -39,9 +26,6 @@ async function createToken(userId: string, email?: string): Promise<string> {
   return token;
 }
 
-/**
- * Fetch a single task from the backend API.
- */
 async function getTask(userId: string, taskId: string, email?: string): Promise<Task | null> {
   try {
     const token = await createToken(userId, email);
@@ -75,20 +59,10 @@ type PageProps = {
 export default async function EditTaskPage({ params }: PageProps) {
   const { id: taskId } = await params;
 
-  // Get session from Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const userId = DEFAULT_USER_ID;
+  const email = DEFAULT_USER_EMAIL;
+  const name = DEFAULT_USER_NAME;
 
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
-  const email = session.user.email;
-  const name = session.user.name || email?.split('@')[0] || 'User';
-
-  // Fetch the task
   const task = await getTask(userId, taskId, email);
 
   if (!task) {

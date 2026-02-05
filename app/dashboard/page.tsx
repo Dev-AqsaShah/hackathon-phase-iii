@@ -1,30 +1,15 @@
-/**
- * Premium Dashboard Page
- *
- * Features:
- * - Dark theme with gradient background
- * - Glass morphism header
- * - Task statistics
- * - Premium task list
- * - Responsive design
- */
-
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 import * as jose from 'jose';
-import { auth } from '@/lib/auth';
 import { Task } from '@/types/task';
 import { EnhancedDashboard } from '@/components/dashboard';
 import Link from 'next/link';
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID || 'default-user';
+const DEFAULT_USER_EMAIL = process.env.DEFAULT_USER_EMAIL || 'user@taskflow.app';
+const DEFAULT_USER_NAME = process.env.DEFAULT_USER_NAME || 'User';
 
-/**
- * Create a JWT token for backend authentication.
- */
 async function createToken(userId: string, email?: string): Promise<string> {
   const secret = new TextEncoder().encode(process.env.BETTER_AUTH_SECRET || '');
 
@@ -40,9 +25,6 @@ async function createToken(userId: string, email?: string): Promise<string> {
   return token;
 }
 
-/**
- * Fetch tasks from the backend API.
- */
 async function getTasks(userId: string, email?: string): Promise<Task[]> {
   try {
     const token = await createToken(userId, email);
@@ -73,24 +55,9 @@ async function getTasks(userId: string, email?: string): Promise<Task[]> {
 }
 
 export default async function DashboardPage() {
-  let session;
-
-  try {
-    session = await auth.api.getSession({
-      headers: await headers(),
-    });
-  } catch (error) {
-    console.error('Session check failed:', error);
-    redirect('/login');
-  }
-
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
-  const email = session.user.email;
-  const name = session.user.name || email?.split('@')[0] || 'User';
+  const userId = DEFAULT_USER_ID;
+  const email = DEFAULT_USER_EMAIL;
+  const name = DEFAULT_USER_NAME;
 
   const tasks = await getTasks(userId, email);
 
@@ -128,7 +95,6 @@ export default async function DashboardPage() {
 
             {/* Right side */}
             <div className="flex items-center gap-3 sm:gap-4">
-              {/* User info */}
               <div className="flex items-center gap-3">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-medium text-dark-100">{name}</p>
@@ -138,19 +104,6 @@ export default async function DashboardPage() {
                   {name.charAt(0).toUpperCase()}
                 </div>
               </div>
-
-              {/* Logout */}
-              <form action="/api/auth/sign-out" method="POST">
-                <button
-                  type="submit"
-                  className="p-2 rounded-lg text-dark-400 hover:text-dark-200 hover:bg-dark-800 transition-colors"
-                  title="Sign out"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
-              </form>
             </div>
           </div>
         </div>
@@ -160,7 +113,7 @@ export default async function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <EnhancedDashboard
           userId={userId}
-          userEmail={email || undefined}
+          userEmail={email}
           userName={name}
           initialTasks={tasks}
         />

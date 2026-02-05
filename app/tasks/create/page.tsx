@@ -1,34 +1,14 @@
-/**
- * Premium Task Creation Page
- *
- * Features:
- * - Dark theme styling
- * - Protected route
- * - Consistent header with dashboard
- */
-
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
 import { TaskForm } from '@/components/TaskForm';
 import Link from 'next/link';
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default async function CreateTaskPage() {
-  // Get session from Better Auth
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID || 'default-user';
+const DEFAULT_USER_NAME = process.env.DEFAULT_USER_NAME || 'User';
 
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
-  const email = session.user.email;
-  const name = session.user.name || email?.split('@')[0] || 'User';
+export default function CreateTaskPage() {
+  const userId = DEFAULT_USER_ID;
+  const name = DEFAULT_USER_NAME;
 
   return (
     <div className="min-h-screen">

@@ -1,38 +1,16 @@
-/**
- * Chat Page
- *
- * AI-powered todo assistant with natural language interface.
- * Features beautiful animations and dark theme design.
- */
-
-import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
 import { AnimatedChatContainer } from '@/components/chat/AnimatedChatContainer';
 import Link from 'next/link';
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default async function ChatPage() {
-  let session;
+const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID || 'default-user';
+const DEFAULT_USER_EMAIL = process.env.DEFAULT_USER_EMAIL || 'user@taskflow.app';
+const DEFAULT_USER_NAME = process.env.DEFAULT_USER_NAME || 'User';
 
-  try {
-    session = await auth.api.getSession({
-      headers: await headers(),
-    });
-  } catch (error) {
-    console.error('Session check failed:', error);
-    redirect('/login');
-  }
-
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const userId = session.user.id;
-  const email = session.user.email;
-  const name = session.user.name || email?.split('@')[0] || 'User';
+export default function ChatPage() {
+  const userId = DEFAULT_USER_ID;
+  const email = DEFAULT_USER_EMAIL;
+  const name = DEFAULT_USER_NAME;
 
   return (
     <div className="h-screen flex flex-col bg-slate-950">
@@ -70,7 +48,6 @@ export default async function ChatPage() {
 
             {/* User section */}
             <div className="flex items-center gap-4">
-              {/* User info */}
               <div className="flex items-center gap-3">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-medium text-white">{name}</p>
@@ -80,19 +57,6 @@ export default async function ChatPage() {
                   {name.charAt(0).toUpperCase()}
                 </div>
               </div>
-
-              {/* Logout */}
-              <form action="/api/auth/sign-out" method="POST">
-                <button
-                  type="submit"
-                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all"
-                  title="Sign out"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
-              </form>
             </div>
           </div>
         </div>

@@ -1,19 +1,10 @@
-/**
- * API Route: /api/tasks/[id]
- *
- * Proxies individual task API requests to the backend with JWT authentication.
- * Handles: GET (get task), PUT (update task), DELETE (delete task)
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
-import { auth } from '@/lib/auth';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID || 'default-user';
+const DEFAULT_USER_EMAIL = process.env.DEFAULT_USER_EMAIL || 'user@taskflow.app';
 
-/**
- * Create a JWT token for backend authentication.
- */
 async function createToken(userId: string | number, email?: string): Promise<string> {
   const secret = new TextEncoder().encode(process.env.BETTER_AUTH_SECRET || '');
 
@@ -31,32 +22,12 @@ async function createToken(userId: string | number, email?: string): Promise<str
 
 type RouteParams = { params: Promise<{ id: string }> };
 
-/**
- * GET /api/tasks/[id] - Get a single task
- */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
+    const userId = DEFAULT_USER_ID;
+    const token = await createToken(userId, DEFAULT_USER_EMAIL);
 
-    // Get session from Better Auth
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { detail: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const userId = session.user.id;
-    const email = session.user.email;
-
-    // Create JWT token
-    const token = await createToken(userId, email);
-
-    // Fetch task from backend
     const response = await fetch(`${BACKEND_URL}/api/${userId}/tasks/${id}`, {
       method: 'GET',
       headers: {
@@ -81,35 +52,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-/**
- * PUT /api/tasks/[id] - Update a task
- */
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-
-    // Get session from Better Auth
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { detail: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const userId = session.user.id;
-    const email = session.user.email;
-
-    // Create JWT token
-    const token = await createToken(userId, email);
-
-    // Parse request body
+    const userId = DEFAULT_USER_ID;
+    const token = await createToken(userId, DEFAULT_USER_EMAIL);
     const body = await request.json();
 
-    // Update task in backend
     const response = await fetch(`${BACKEND_URL}/api/${userId}/tasks/${id}`, {
       method: 'PUT',
       headers: {
@@ -135,32 +84,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-/**
- * DELETE /api/tasks/[id] - Delete a task
- */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
+    const userId = DEFAULT_USER_ID;
+    const token = await createToken(userId, DEFAULT_USER_EMAIL);
 
-    // Get session from Better Auth
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { detail: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const userId = session.user.id;
-    const email = session.user.email;
-
-    // Create JWT token
-    const token = await createToken(userId, email);
-
-    // Delete task in backend
     const response = await fetch(`${BACKEND_URL}/api/${userId}/tasks/${id}`, {
       method: 'DELETE',
       headers: {
@@ -189,32 +118,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-/**
- * PATCH /api/tasks/[id] - Toggle task completion
- */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
+    const userId = DEFAULT_USER_ID;
+    const token = await createToken(userId, DEFAULT_USER_EMAIL);
 
-    // Get session from Better Auth
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { detail: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const userId = session.user.id;
-    const email = session.user.email;
-
-    // Create JWT token
-    const token = await createToken(userId, email);
-
-    // Toggle completion in backend
     const response = await fetch(`${BACKEND_URL}/api/${userId}/tasks/${id}/complete`, {
       method: 'PATCH',
       headers: {

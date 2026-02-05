@@ -1,10 +1,5 @@
-/**
- * Root layout with Better Auth provider, Toast provider, and HTML structure.
- */
-
 import type { Metadata } from 'next';
 import './globals.css';
-import { AuthProvider } from '@/components/auth/AuthProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 
 export const metadata: Metadata = {
@@ -24,11 +19,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen antialiased">
-        <AuthProvider>
-          <ToastProvider>
-            <main className="min-h-screen">{children}</main>
-          </ToastProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <main className="min-h-screen">{children}</main>
+        </ToastProvider>
       </body>
     </html>
   );

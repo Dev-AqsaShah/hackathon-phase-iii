@@ -102,10 +102,7 @@ export function TaskForm({ initialData, userId, mode }: TaskFormProps) {
       console.error('Task form error:', error);
 
       // Handle API errors
-      if (error.message?.includes('Unauthorized')) {
-        setApiError('Session expired. Please sign in again.');
-        setTimeout(() => router.push('/login'), 2000);
-      } else if (error.message?.includes('422')) {
+      if (error.message?.includes('422')) {
         setApiError('Validation error. Please check your inputs.');
       } else {
         setApiError(error.message || 'Failed to save task. Please try again.');
